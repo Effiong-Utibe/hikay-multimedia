@@ -1,6 +1,6 @@
 FROM composer:2 AS composer
 
-FROM php:8.2-cli
+FROM php:8.4-cli
 
 WORKDIR /app
 
@@ -19,9 +19,9 @@ COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader || true
+RUN composer install --no-dev --optimize-autoloader
 
-RUN chmod -R 775 storage bootstrap/cache || true
+RUN chmod -R 775 storage bootstrap/cache
 
 EXPOSE 10000
 
