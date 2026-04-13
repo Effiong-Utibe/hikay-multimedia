@@ -11,6 +11,7 @@ export default defineConfig({
             ssr: 'resources/js/ssr.tsx',
             refresh: true,
         }),
+
         react({
             babel: {
                 plugins: ['babel-plugin-react-compiler'],
@@ -21,6 +22,7 @@ export default defineConfig({
             formVariants: true,
         }),
     ],
+     base: '/build/', // IMPORTANT FIX
     esbuild: {
         jsx: 'automatic',
     },

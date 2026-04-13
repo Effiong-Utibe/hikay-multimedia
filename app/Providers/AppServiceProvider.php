@@ -14,6 +14,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use App\Models\User;
 use App\Policies\MultimediaPolicy;
 use App\Policies\UserPolicy;
+ use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -34,6 +35,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
+    if (env('APP_ENV') === 'production') {
+        URL::forceScheme('https');
+    }
         // Register policy manually
         Gate::policy(Media::class, MediaPolicy::class);
         Gate::policy(Multimedia::class, MultimediaPolicy::class);
