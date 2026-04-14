@@ -5,32 +5,36 @@ FROM php:8.4-cli
 
 WORKDIR /app
 
-# 2. Install dependencies
+# 2. System dependencies
 RUN apt-get update && apt-get install -y \
     unzip git curl libzip-dev libpng-dev libonig-dev libxml2-dev supervisor
 
+# 3. PHP extensions
 RUN docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl
 
+# 4. Copy binaries
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 COPY --from=node /usr/local/ /usr/local/
 
+# 5. Copy project
 COPY . .
 
-# ✅ Prevent Laravel from booting during build
+# ✅ 6. Install PHP deps WITHOUT running Laravel (prevents crash)
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# ✅ Build frontend AFTER backend install
+# ✅ 7. Build frontend (Vite)
 RUN npm install && npm run build
 
-# ✅ Permissions
+# ✅ 8. Set permissions
 RUN chmod -R 775 storage bootstrap/cache
 
-# Supervisor
+# 9. Supervisor config
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+# 10. Expose ports
 EXPOSE 10000 8080
 
-# ✅ ONLY run Laravel at runtime (NOT build)
+# ✅ 11. Runtime only (Laravel boots HERE, not during build)
 CMD php artisan config:cache && \
     php artisan migrate --force && \
     supervisord -n
