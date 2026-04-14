@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { Bell } from "lucide-react";
-
+import { Bell, MoreVertical } from "lucide-react";
 type Notification = {
   id: number;
   message: string;
@@ -10,7 +9,7 @@ type Notification = {
 export default function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
-
+  const [menuOpenId, setMenuOpenId] = useState<number | null>(null);
   const userId = document
     .querySelector('meta[name="user-id"]')
     ?.getAttribute('content');
@@ -33,7 +32,7 @@ export default function NotificationBell() {
 
     (window as any).Echo
       .private(`notifications.${userId}`)
-      .listen(".NewNotification", (e: any) => {
+      .listen('.NewNotification', (e: any) => {
         setNotifications(prev => [
           {
             id: e.id,
@@ -87,6 +86,22 @@ export default function NotificationBell() {
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;
+  const deleteNotification = async (id: number) => {
+    try {
+      await fetch(`/notifications/delete/${id}`, {
+        method: "DELETE",
+        credentials: "same-origin",
+        headers: {
+          "X-CSRF-TOKEN": csrfToken,
+          Accept: "application/json",
+        },
+      });
+
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+    } catch (error) {
+      console.error("DELETE ERROR:", error);
+    }
+  };
 
   return (
     <div className="relative">
@@ -127,16 +142,45 @@ export default function NotificationBell() {
                 No notifications
               </p>
             ) : (
-              notifications.map((n) => (
-                <div
-                  key={n.id}
-                  onClick={() => markAsRead(n.id)}
-                  className={`px-4 py-3 text-sm border-b cursor-pointer transition ${n.read ? "bg-white" : "bg-gray-100"
-                    }`}
-                >
-                  {n.message}
-                </div>
-              ))
+                notifications.map((n) => (
+                  <div
+                    key={n.id}
+                    className={`px-4 py-3 text-sm border-b flex items-start justify-between gap-2 transition ${n.read ? "bg-white" : "bg-gray-100"
+                      }`}
+                  >
+                    {/* message */}
+                    <div
+                      className="flex-1 cursor-pointer"
+                      onClick={() => markAsRead(n.id)}
+                    >
+                      {n.message}
+                    </div>
+
+                    {/* ellipsis */}
+                    <div className="relative">
+                      <button
+                        onClick={() =>
+                          setMenuOpenId(menuOpenId === n.id ? null : n.id)
+                        }
+                        className="p-1 hover:bg-gray-200 rounded"
+                      >
+                        <MoreVertical className="w-4 h-4" />
+                      </button>
+
+                      {/* dropdown */}
+                      {menuOpenId === n.id && (
+                        <div className="absolute right-0 mt-1 w-28 bg-white border rounded shadow z-50">
+                          <button
+                            onClick={() => deleteNotification(n.id)}
+                            className="w-full text-left px-3 py-2 text-sm text-red-500 hover:bg-red-50"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))
             )}
           </div>
         </div>

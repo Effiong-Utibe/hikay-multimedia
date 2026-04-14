@@ -4,41 +4,31 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '../css/app.css';
 import { initializeTheme } from './hooks/use-appearance';
-
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
-
 import Echo from 'laravel-echo';
-import Pusher from 'pusher-js';
 
-window.Pusher = Pusher;
+const appName = import.meta.env.VITE_APP_NAME || 'Hikay Media';
 
-// window.Echo = new Echo({
-//   broadcaster: 'pusher',
-//   key: import.meta.env.VITE_PUSHER_APP_KEY,
-//   cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
-//   forceTLS: true,
-// });
 
 
 const csrfToken =
   document
     .querySelector('meta[name="csrf-token"]')
     ?.getAttribute('content') || '';
-(window as any).Pusher = Pusher; // ✅ REQUIRED
+
+import Pusher from 'pusher-js'; 
+
+// ✅ REQUIRED FOR REVERB
+(window as any).Pusher = Pusher;
+
 
 (window as any).Echo = new Echo({
-  broadcaster: 'pusher',
-  key: import.meta.env.VITE_PUSHER_APP_KEY,
-  cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
-  forceTLS: true,
-
-  authEndpoint: '/broadcasting/auth',
-
-  auth: {
-    headers: {
-      'X-CSRF-TOKEN': csrfToken, // ✅ FIXED
-    },
-  },
+  broadcaster: 'reverb',
+  key: import.meta.env.VITE_REVERB_APP_KEY,
+  wsHost: import.meta.env.VITE_REVERB_HOST,
+  wsPort: import.meta.env.VITE_REVERB_PORT,
+  wssPort: import.meta.env.VITE_REVERB_PORT,
+  forceTLS: false,
+  enabledTransports: ['ws', 'wss'],
 });
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),

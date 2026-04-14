@@ -73,7 +73,23 @@ Route::middleware(['auth','role:admin','permission:view users', 'can:admin'])->g
     Route::resource('/admin/media', MultimediaController::class);
     Route::get('admin/role_management', [RoleController::class, 'role']);
     Route::post('/users/{user}/roles', [RoleController::class, 'assignRoles']);
-    Route::get('/test-broadcast', [NotificationController::class, 'test']);
+  Route::get('/test-broadcast', function () {
+    $user = Auth::user();
+
+    $notification = \App\Models\Notification::create([
+        'user_id' => $user->id,
+        'message' => 'Reverb is working 🚀',
+        'read' => false,
+    ]);
+
+    event(new \App\Events\NewNotification(
+        $notification->id,
+        $notification->message,
+        $user->id
+    ));
+
+    return 'sent';
+});
     Route::post('/notifications/read/{id}', function ($id) {
     $notification = \App\Models\Notification::find($id);
 
@@ -98,6 +114,15 @@ Route::post('/notifications/read-all', function () {
 });
 Route::post('/notifications/read-all', function () {
     Auth::user()->notifications()->update(['read' => true]);
+    return response()->json(['success' => true]);
+});
+Route::delete('/notifications/delete/{id}', function ($id) {
+    $notification = \App\Models\Notification::where('id', $id)
+        ->where('user_id', Auth::id())
+        ->firstOrFail();
+
+    $notification->delete();
+
     return response()->json(['success' => true]);
 });
 });
