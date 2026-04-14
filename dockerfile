@@ -15,8 +15,7 @@ COPY . .
 
 # 1. Install dependencies.
 # We pass dummy vars JUST in case, and use --no-interaction.
-RUN REVERB_APP_KEY=build REVERB_APP_SECRET=build REVERB_APP_ID=build \
-    composer install --no-dev --optimize-autoloader --no-interaction
+
 
 # 2. Build Frontend Assets
 RUN npm install && npm run build
