@@ -9,30 +9,23 @@ RUN apt-get update && apt-get install -y \
 
 RUN docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl
 
-# Composer
 COPY --from=composer /usr/bin/composer /usr/bin/composer
-
-# Node
 COPY --from=node /usr/local/ /usr/local/
 
 COPY . .
 
-# ✅ FIXED HERE
+# IMPORTANT: prevent build-time broadcast crash
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-RUN npm install
-RUN npm run build
+RUN npm install && npm run build
 
 RUN chmod -R 775 storage bootstrap/cache
 
-# Supervisor config
+# supervisor config
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-EXPOSE 10000
-EXPOSE 8080
+EXPOSE 10000 8080
 
-CMD php artisan config:clear && \
-    php artisan config:cache && \
-    php artisan route:cache && \
+CMD php artisan config:cache && \
     php artisan migrate --force && \
     supervisord -n
