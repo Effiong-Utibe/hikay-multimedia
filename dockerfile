@@ -17,7 +17,9 @@ COPY --from=node /usr/local/ /usr/local/
 
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader
+# ✅ FIXED HERE
+RUN composer install --no-dev --optimize-autoloader --no-scripts
+
 RUN npm install
 RUN npm run build
 
@@ -29,5 +31,8 @@ COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 EXPOSE 10000
 EXPOSE 8080
 
-# ✅ ONLY ONE ENTRYPOINT
-CMD php artisan migrate --force && supervisord -n
+CMD php artisan config:clear && \
+    php artisan config:cache && \
+    php artisan route:cache && \
+    php artisan migrate --force && \
+    supervisord -n
