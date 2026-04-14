@@ -18,6 +18,8 @@ COPY . .
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
 RUN npm install && npm run build
+RUN REVERB_APP_KEY=fake REVERB_APP_SECRET=fake REVERB_APP_ID=fake \
+    composer install --no-dev --optimize-autoloader
 
 RUN chmod -R 775 storage bootstrap/cache
 
