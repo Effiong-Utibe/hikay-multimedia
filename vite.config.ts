@@ -4,6 +4,8 @@ import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
 
+const isDev = process.env.NODE_ENV === 'development';
+
 export default defineConfig({
     plugins: [
         laravel({
@@ -11,7 +13,14 @@ export default defineConfig({
             ssr: 'resources/js/ssr.tsx',
             refresh: true,
         }),
-
+           // ✅ ONLY run Wayfinder locally
+          ...(isDev
+            ? [
+                wayfinder({
+                    formVariants: true,
+                }),
+            ]
+            : []),
         react({
             babel: {
                 plugins: ['babel-plugin-react-compiler'],
