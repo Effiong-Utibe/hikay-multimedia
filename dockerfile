@@ -34,6 +34,8 @@ COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # 10. Expose ports
 EXPOSE 10000 8080
 
+RUN WAYFINDER_DISABLED=true npm install && npm run build
+
 # ✅ 11. Runtime only (Laravel boots HERE, not during build)
 CMD php artisan config:cache && \
     php artisan migrate --force && \

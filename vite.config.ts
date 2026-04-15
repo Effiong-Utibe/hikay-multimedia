@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
 
-const enableWayfinder = process.env.WAYFINDER === 'true'
+const disableWayfinder = process.env.WAYFINDER_DISABLED === 'true';
 
 export default defineConfig({
     plugins: [
@@ -14,8 +14,7 @@ export default defineConfig({
             refresh: true,
         }),
            // ✅ ONLY run Wayfinder locally
-          ...(enableWayfinder
-            
+          ...(!disableWayfinder
             ? [
                 wayfinder({
                     formVariants: true,
